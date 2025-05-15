@@ -2,8 +2,11 @@ import os, re, json, html
 import openai
 from typing import List, Dict, Optional, Tuple
 from tools.parse import parse_tool_call_gemma, get_observation
-
+from colorama import init, Fore, Style, Back
 import utils.playwright_manager
+
+# Initialize colorama
+init()
 
 client = openai.OpenAI(
     base_url=os.getenv("OPENAI_BASE_URL", "http://localhost:8080/v1"),
@@ -27,6 +30,7 @@ def llm(messages: List[Dict[str, str]]) -> str:
     )
 
     full_response = ""
+    print(f"{Fore.CYAN}Assistant: {Style.RESET_ALL}", end="", flush=True)
     for chunk in resp:
         if chunk.choices[0].delta.content:
             content = chunk.choices[0].delta.content
@@ -78,12 +82,9 @@ def run_agent_loop(initial_query: str, max_turns: int = 10) -> None:
         response = llm(messages)
         
         if "```tool_code" not in response:
-            print("\nAgent's response:")
-            print(response)
-            
-            user_input = input("\nYour response (or press Enter to finish): ").strip()
+            user_input = input(f"\n{Fore.GREEN}Your response (or press Enter to finish): {Style.RESET_ALL}").strip()
             if not user_input:
-                print("\nEnding conversation.")
+                print(f"\n{Fore.YELLOW}Ending conversation.{Style.RESET_ALL}")
                 return
                 
             messages.append({"role": "assistant", "content": response})
@@ -101,29 +102,35 @@ def run_agent_loop(initial_query: str, max_turns: int = 10) -> None:
         func_name, args = func_call
         
         if func_name == "finish":
-            print("\nAgent finished the conversation.")
-            return  
+            print(f"\n{Fore.YELLOW}Agent finished the current response.{Style.RESET_ALL}")
+            user_input = input(f"\n{Fore.GREEN}Would you like to continue? (y/n): {Style.RESET_ALL}").strip().lower()
+            if user_input != 'y':
+                print(f"\n{Fore.YELLOW}Ending conversation.{Style.RESET_ALL}")
+                return
+            messages.append({"role": "user", "content": "Please continue the conversation."})
+            turns += 1
+            continue
 
         try:
             observation = get_observation(func_name, args)
 
             if func_name in ["search_ddg", "search_arxiv"]:
-                print("\nSearch Results:")
-                print("=" * 80)
+                print(f"\n{Fore.BLUE}Search Results:{Style.RESET_ALL}")
+                print(f"{Back.BLUE}{Fore.WHITE}{'=' * 80}{Style.RESET_ALL}")
                 print(observation)
-                print("=" * 80)
+                print(f"{Back.BLUE}{Fore.WHITE}{'=' * 80}{Style.RESET_ALL}")
             elif func_name in ["click", "open"]:
-                print(f"\n{func_name.capitalize()} result:")
-                print("=" * 80)
+                print(f"\n{Fore.MAGENTA}{func_name.capitalize()} result:{Style.RESET_ALL}")
+                print(f"{Back.MAGENTA}{Fore.WHITE}{'=' * 80}{Style.RESET_ALL}")
                 print(observation)
-                print("=" * 80)
+                print(f"{Back.MAGENTA}{Fore.WHITE}{'=' * 80}{Style.RESET_ALL}")
             messages.append({
                 "role": "user",
                 "content": f"```tool_output\n{observation}\n```"
             })
         except Exception as e:
             error_msg = f"Error executing {func_name}: {str(e)}"
-            print(f"\nError: {error_msg}")
+            print(f"\n{Fore.RED}Error: {error_msg}{Style.RESET_ALL}")
             messages.append({
                 "role": "user",
                 "content": f"```tool_output\n{error_msg}\n```"
