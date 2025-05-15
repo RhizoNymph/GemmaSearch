@@ -194,5 +194,5 @@ def finish() -> None:
 """
 
 if __name__ == "__main__":
-    initial_query = "What are some applications of null spaces in robotics?"
+    initial_query = input("Enter your query: ")
     run_agent_loop(initial_query) 
