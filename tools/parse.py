@@ -1,12 +1,14 @@
 from typing import List, Dict, Optional
 
-from tools.search import _search_duckduckgo, _click_on_result
+from tools.search import _search_ddg, _search_arxiv, _click_on_result
 from tools.fetch import _render_and_extract
 
 def get_observation(function_name: str, args: Dict) -> str:
     """Bridge from the model's function call → real tool output."""
-    if function_name == "search":
-        return _search_duckduckgo(args["query"])
+    if function_name == "search_ddg":
+        return _search_ddg(args["query"])
+    if function_name == "search_arxiv":
+        return _search_arxiv(args["query"])
     if function_name == "click":
         return _click_on_result(args.get("rank", 0))  # rank defaults to 0 if not provided
     if function_name == "open":

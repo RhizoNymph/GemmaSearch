@@ -32,7 +32,7 @@ def llm(messages: List[Dict[str, str]]) -> str:
             content = chunk.choices[0].delta.content
             print(content, end="", flush=True)
             full_response += content
-    print()
+
     return full_response.strip()
 
 def parse_function_call(response: str) -> Optional[Tuple[str, Dict]]:
@@ -107,12 +107,12 @@ def run_agent_loop(initial_query: str, max_turns: int = 10) -> None:
         try:
             observation = get_observation(func_name, args)
 
-            if func_name == "search":
+            if func_name in ["search_ddg", "search_arxiv"]:
                 print("\nSearch Results:")
                 print("=" * 80)
                 print(observation)
                 print("=" * 80)
-            if func_name in ["click", "open"]:
+            elif func_name in ["click", "open"]:
                 print(f"\n{func_name.capitalize()} result:")
                 print("=" * 80)
                 print(observation)
@@ -142,13 +142,22 @@ finish()
 The following Python methods are available:
 
 ```python
-def search(query: str, k: int = 10) -> str:
-    '''Search the web for the most relevant information on the given query.'''
+def search_ddg(query: str, k: int = 10) -> str:
+    '''Search the web using DuckDuckGo for the most relevant information on the given query.'''
     Args:
         query (str): The search query.
         k (int): The number of results to return.
     Returns:
         str: A formatted string of search results.
+    '''
+
+def search_arxiv(query: str, k: int = 10) -> str:
+    '''Search arXiv for academic papers matching the given query.'''
+    Args:
+        query (str): The search query.
+        k (int): The number of results to return.
+    Returns:
+        str: A formatted string of arXiv paper results.
     '''
 
 def click(rank: int) -> str:
@@ -178,5 +187,5 @@ def finish() -> None:
 """
 
 if __name__ == "__main__":
-    initial_query = "Give me a study plan for transitioning to robotics as a software engineer, based on search results"
+    initial_query = "What are some applications of null spaces in robotics?"
     run_agent_loop(initial_query) 
