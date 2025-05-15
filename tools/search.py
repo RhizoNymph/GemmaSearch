@@ -32,7 +32,7 @@ def _search_arxiv(query: str, k: int = 10) -> str:
     for result in search.results():
         _LAST_RESULTS.append({
             'title': result.title,
-            'href': result.entry_id,
+            'href': result.pdf_url,
             'body': result.summary,
             'authors': [author.name for author in result.authors],
             'published': result.published.strftime("%Y-%m-%d"),

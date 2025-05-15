@@ -10,7 +10,7 @@ import io
 
 def _render_and_extract(url: str, timeout_ms: int = 20_000) -> str:
     """Render page in Playwright, then distil main readable text."""
-    if url.lower().endswith('.pdf'):
+    if url.lower().endswith('.pdf') or url.lower().startswith('http://arxiv.org/pdf/'):
         return _download_and_parse_pdf(url)
         
     p = browser_context.new_page()
