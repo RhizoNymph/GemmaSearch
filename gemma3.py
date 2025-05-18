@@ -103,11 +103,11 @@ def run_agent_loop(initial_query: str, max_turns: int = 10) -> None:
         
         if func_name == "finish":
             print(f"\n{Fore.YELLOW}Agent finished the current response.{Style.RESET_ALL}")
-            user_input = input(f"\n{Fore.GREEN}Would you like to continue? (y/n): {Style.RESET_ALL}").strip().lower()
-            if user_input != 'y':
+            user_new_query = input(f"\n{Fore.GREEN}Agent has finished. Enter your next query to continue, or press Enter to quit: {Style.RESET_ALL}").strip()
+            if not user_new_query:
                 print(f"\n{Fore.YELLOW}Ending conversation.{Style.RESET_ALL}")
                 return
-            messages.append({"role": "user", "content": "Please continue the conversation."})
+            messages.append({"role": "user", "content": user_new_query})
             turns += 1
             continue
 
